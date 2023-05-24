@@ -3,7 +3,8 @@ company: {{ company }}
 
 ### Xcode project settings
 project_name: {{ project_name }}
-xcodeproj_path: {{ xcodeproj_path }}
+{% if project_xcodeproj_path != "" %}project_xcodeproj_path: {{ project_xcodeproj_path }}{% endif %}
+
 {% if prefix != "" %}prefix: {{ prefix }}{% endif %}
 
 {% if (project_target != nil and project_target != "") or (project_file_path != nil and project_file_path != "") or (project_group_path != nil and project_group_path != "") %}### Code generation settings section
@@ -18,6 +19,7 @@ project_group_path: {{ project_group_path }}{% endif %}
 {% endif %}
 
 {% if (test_target != nil and test_target != "") or (test_file_path != nil and test_file_path != "") or (test_group_path != nil and test_group_path != "") %}### Tests generation settings section
+{% if test_xcodeproj_path != "" %}test_xcodeproj_path: {{ test_xcodeproj_path }}{% endif %}
 {% if test_target != nil and test_target != "" %}# The tests target name
 test_target: {{ test_target }}{% endif %}
 
@@ -27,9 +29,6 @@ test_file_path: {{ test_file_path }}{% endif %}
 {% if test_group_path != nil and test_group_path != "" %}# The Xcode group path to new tests
 test_group_path: {{ test_group_path }}{% endif %}
 {% endif %}
-
-{% if create_logical_groups != nil and create_logical_groups %}# Create Groups in Xcode without folders in filesystem
-create_logical_groups: {{ create_logical_groups }} {% endif %}
 
 {% if podfile_path != nil or cartfile_path != nil %}### Dependencies settings section{% endif %}
 {% if podfile_path != nil %}podfile_path: {{ podfile_path }}{% endif %}

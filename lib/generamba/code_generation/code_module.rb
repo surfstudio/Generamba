@@ -16,19 +16,18 @@ module Generamba
                 :prefix,
                 :project_name,
                 :product_module_name,
-                :xcodeproj_path,
+                :project_xcodeproj_path,
                 :project_file_path,
-				:project_file_root,
                 :project_group_path,
+                :test_xcodeproj_path,
                 :test_file_path,
-				:test_file_root,
                 :test_group_path,
                 :project_targets,
                 :test_targets,
                 :podfile_path,
                 :cartfile_path,
-                :custom_parameters,
-                :create_logical_groups
+                :no_module_root_directory,
+                :custom_parameters
 
     def initialize(name, rambafile, options)
       # Base initialization
@@ -44,17 +43,14 @@ module Generamba
       @product_module_name = rambafile[PRODUCT_MODULE_NAME_KEY]
       @product_module_name = @project_name.gsub(C99IDENTIFIER, '_') if !@product_module_name && @project_name
 
-      @xcodeproj_path = rambafile[XCODEPROJ_PATH_KEY]
+      @project_xcodeproj_path = rambafile[PROJECT_XCODEPROJ_PATH_KEY]
+      @test_xcodeproj_path = rambafile[TEST_XCODEPROJ_PATH_KEY]
+
+      @no_module_root_directory = options[:no_module_root_directory]
 
       setup_file_and_group_paths(rambafile[PROJECT_FILE_PATH_KEY], rambafile[PROJECT_GROUP_PATH_KEY], PATH_TYPE_PROJECT)
       setup_file_and_group_paths(rambafile[TEST_FILE_PATH_KEY], rambafile[TEST_GROUP_PATH_KEY], PATH_TYPE_TEST)
 
-      @create_logical_groups = rambafile[CREATE_LOGICAL_GROUPS_KEY] if rambafile[CREATE_LOGICAL_GROUPS_KEY]
-      if create_logical_groups
-          @project_file_root = Pathname.new(rambafile[PROJECT_FILE_PATH_KEY])
-          @test_file_root = Pathname.new(rambafile[TEST_FILE_PATH_KEY])
-      end
-      
       @project_targets = [rambafile[PROJECT_TARGET_KEY]] if rambafile[PROJECT_TARGET_KEY]
       @project_targets = rambafile[PROJECT_TARGETS_KEY] if rambafile[PROJECT_TARGETS_KEY]
 
@@ -66,9 +62,13 @@ module Generamba
 
       # Options adaptation
       @author = options[:author] if options[:author]
+
+      @project_xcodeproj_path = options[:project_xcodeproj_path] if options[:project_xcodeproj_path]
       @project_targets = options[:project_targets].split(',') if options[:project_targets]
+
+      @test_xcodeproj_path = options[:test_xcodeproj_path] if options[:test_xcodeproj_path]
       @test_targets = options[:test_targets].split(',') if options[:test_targets]
-      
+
       setup_file_and_group_paths(options[:project_file_path], options[:project_group_path], PATH_TYPE_PROJECT)
       setup_file_and_group_paths(options[:test_file_path], options[:test_group_path], PATH_TYPE_TEST)
 
@@ -90,7 +90,8 @@ module Generamba
           file_path = group_path unless file_path
 
           variable_value = file_path.gsub(SLASH_REGEX, '')
-          variable_value = Pathname.new(variable_value).join(@name)
+          variable_value = Pathname.new(variable_value)
+          variable_value = variable_value.join(@name) unless @no_module_root_directory
           instance_variable_set("@#{variable_name}", variable_value)
         end
 
@@ -100,7 +101,8 @@ module Generamba
           group_path = file_path unless group_path
 
           variable_value = group_path.gsub(SLASH_REGEX, '')
-          variable_value = Pathname.new(variable_value).join(@name)
+          variable_value = Pathname.new(variable_value)
+          variable_value = variable_value.join(@name) unless @no_module_root_directory
           instance_variable_set("@#{variable_name}", variable_value)
         end
       end
