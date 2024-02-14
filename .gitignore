@@ -2,3 +2,7 @@
 .rakeTasks
 encodings.xml
 Gemfile.lock
+*.gem
+
+# OS X Finder stuff
+.DS_Store
